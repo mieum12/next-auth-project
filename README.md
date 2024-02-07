@@ -1,12 +1,6 @@
 # NextJs 인증 시스템: NextAuth 패키지의 사용
 
-next-auth v3로 사용되었다.
-필요에따라 v3을 설치함.
-
-`npm install --save-exact next-auth@3
-`
-
-원하는 경우에는 코드를 next-auth 로 업데이트하기 위한 v4 마이그레이션 공식 안내서를 참조
+ next-auth 로 업데이트하기 위한 v4 마이그레이션 공식 안내서를 참조
 
 https://next-auth.js.org/getting-started/upgrade-v4
 
