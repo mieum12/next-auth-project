@@ -1,5 +1,6 @@
 import React, {useRef, useState} from 'react';
 import classes from './auth-form.module.css';
+import {signIn} from "next-auth/react";
 
 async function createUser(email, password) {
 
@@ -47,6 +48,17 @@ function AuthForm() {
 
     if (isLogin) {
       // 사용자를 로그인시킴
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: enteredEmail,
+        password: enteredPassword,
+      })
+      console.log('result', result)
+
+      //에러가 안나고 제대로 로그인에 성공하면
+      if(!result.error) {
+        // auth 상태를 저장
+      }
     } else {
       try {
         // create mode 라면 사용자를 생성하게 한다
