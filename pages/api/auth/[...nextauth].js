@@ -4,12 +4,13 @@ import {connectToDatabase} from "@/lib/db";
 import {verifyPassword} from "@/lib/auth";
 
 // NextAuth을 호출 -> 새로운 handler 함수 생성
+// 로그인 로직 구현
 export default NextAuth({
   // 인증된 사용자에 대한 세션을 관리하는 방법을 구성할 수 있는 객체
   session: {
     jwt: true, //jwt를 사용
   },
-  // 크레덴결 기반의 인증
+  // 크레덴결셜 기반의 인증
   providers: [
     Providers.Credentials({
       async authorize(credentials) {
