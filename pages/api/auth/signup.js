@@ -7,15 +7,12 @@ import {hashPassword} from "@/lib/auth";
 async function handler(req, res) {
   // post 일 때만 사용자를 생성하는 로직이기 때문에 post가 아니라면 끝내준다
   if (req.method !== 'POST') {
-    console.log('not post!!!')
     return
   }
 
-  console.log('yes post!!!1')
   // 유효한 데이터가 있을때만 작업하기 위해 들어오는 데이터 먼저 구성하기
   const data = req.body
   const { email, password } = data
-  console.log('email&pw ----------', email, password)
 
   // 유효한 데이터인지 검증 -> 검증 되면 데이터베이스(컬렉션)에 저장할 대상이 된다
   if (
@@ -33,17 +30,21 @@ async function handler(req, res) {
     return
   }
 
-  console.log('유효성 검증은 통과')
-
   const client = await connectToDatabase()
-  console.log('client', client)
-
   const db = client.db()
-  console.log('db', db)
+
+  // 같은 이메일의 유저가 이미 존재하면 true가 되는 결과 -> 리턴으로 반환
+  const existingUser = await db.collection('users').findOne({email: email})
+
+  if (existingUser) {
+    res.status(422).json({message: 'User already exist.'})
+    client.close() // db연결 해제
+    return;
+  }
+
 
   // 비번은 저장할 때 암호화하기
   const hashedPassword = await hashPassword(password)
-  console.log('hashedPassword: ',hashedPassword)
 
   // users라는 컬렉션 생성하기 (사용자 추가)
   const result = await db.collection('users').insertOne({
@@ -51,9 +52,8 @@ async function handler(req, res) {
     password: hashedPassword
   })
 
-  console.log('result: ',result)
-
   res.status(201).json({message:'Create user!'})
+  client.close()
 }
 
 export default handler
