@@ -1,6 +1,7 @@
 import React, {useRef, useState} from 'react';
 import classes from './auth-form.module.css';
 import {signIn} from "next-auth/react";
+import {useRouter} from "next/router";
 
 async function createUser(email, password) {
 
@@ -32,6 +33,7 @@ function AuthForm() {
   const passwordInputRef = useRef()
 
   const [isLogin, setIsLogin] = useState(true);
+  const router =useRouter()
 
   function switchAuthModeHandler() {
     setIsLogin((prevState) => !prevState);
@@ -56,8 +58,17 @@ function AuthForm() {
       console.log('result', result)
 
       //에러가 안나고 제대로 로그인에 성공하면
+      // 리다이렉트 진행
       if(!result.error) {
         // auth 상태를 저장
+
+        // window.location.herf으로 리다이렉트하면
+        // 애플리케이션 전체가 재설정된다
+        // 그렇게 되면 초기 페이지 로딩에는 문제 없지만
+        // SPA 작업을 진행중인데 그러면 전체 페이지를 재설정해서
+        // 그동안의 설정 상태를 다 잃는 위험이 있다
+        // 그러므로 여기서는 useRouter hook을 사용한다
+        router.replace('/profile')
       }
     } else {
       try {
