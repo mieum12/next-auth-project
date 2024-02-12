@@ -42,6 +42,7 @@ export default NextAuth({
 
         // authorize 함수 안에서 객체를 반환하며 NextAuth 인증이 성공했다고 알리기
         // 이 객체는 JSON web token 으로 부호화된다
+        // 나중에 getSesssion으로 가져와 진다
         // user 객체 전체를 전달할 수는 없다, 비번 포함 주의
         client.close()
         return {

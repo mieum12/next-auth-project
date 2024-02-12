@@ -11,6 +11,7 @@ async function handler(req, res) {
   }
 
   // 유효한 데이터가 있을때만 작업하기 위해 들어오는 데이터 먼저 구성하기
+  // 요청 바디에 이메일, 비번이 포함되어있다
   const data = req.body
   const { email, password } = data
 

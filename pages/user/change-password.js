@@ -12,6 +12,8 @@
 // 요청, 응답을 받는 핸들러 함수 생성
 
 import {getSession} from "next-auth/react";
+import {connectToDatabase} from "@/lib/db";
+import {hashPassword, verifyPassword} from "@/lib/auth";
 
 export default async function handler(req, res) {
   // 1. 올바른 요청이 들어오고 있는지 확인
@@ -33,4 +35,50 @@ export default async function handler(req, res) {
     res.status(401).json({message: '인증된 사용자가 아닙니다.'})
     return
   }
+  // 들어온 요청에서 데이터 추출
+  // email을 입력하지 않아도 토큰에 이메일 주소를 부호화했기 때문에 알 수 있다
+  // pages/api/auth/[...] 에서 email 객체를 반환하고 해당 데이터는 토큰이 되어
+  // session 상수에 포함된다
+  const userEmail = session.user.email
+  // signup handler에서처럼 req.body에서 정보 가져오기
+  // 요청과 함께 보내는 데이터에는 이 두 필드가 있어야한다
+  const oldPassword = req.body.oldPassword
+  const newPassword = req.body.newPassword
+
+  // db에 연결해 사용자 정보가 저장된 users 컬렉션에 접근
+  const client = await connectToDatabase()
+  const usersCollection = client.db().collection('users')
+  const user = await usersCollection.findOne({email: userEmail})
+
+  if (!user) {
+    // 세션으로부터 사용자 이메일 주소를 못가져오는 경우
+    // 연결을 해제하고 에러 반환하기
+    res.status(404).json({message: 'User not found!'})
+    client.close()
+    return;
+  }
+
+  const currentPassword = user.password
+  const passwordsAreEqual = await verifyPassword(oldPassword, currentPassword)
+
+  // 인증된 사용자이긴하지만, 비번 변경 권한이 없음
+  // 422 - 입력값이 틀렸음 을 사용해도 됨
+  if (!passwordsAreEqual) {
+    res.status(403).json({message: 'Invalid password'})
+    client.close()
+    return;
+  }
+
+  // 문서 업데이트
+  // userEmail과 일치하는 이메일을 가진 문서, 업데이트할 내용을 전달한다
+  // $set 은 바꿔야 할 문서의 프로퍼티를 설정
+  // 비번은 해쉬해서 넣기
+  const hashedPassword = await hashPassword(newPassword)
+  const result = await  usersCollection.updateOne(
+    {email: userEmail},
+    {$set: {password: hashedPassword}}
+  )
+
+  client.close()
+  res.status(200).json({message: 'password updated!'})
 }
