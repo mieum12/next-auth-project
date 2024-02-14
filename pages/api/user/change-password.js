@@ -14,6 +14,8 @@
 import {getSession} from "next-auth/react";
 import {connectToDatabase} from "@/lib/db";
 import {hashPassword, verifyPassword} from "@/lib/auth";
+import {getServerSession} from "next-auth";
+import {authOptions} from "@/pages/api/auth/[...nextauth]";
 
 export default async function handler(req, res) {
   // 1. 올바른 요청이 들어오고 있는지 확인
@@ -30,10 +32,19 @@ export default async function handler(req, res) {
   // getSession은 요청을 조사해 세션 토큰 쿠키가 요청의 일부인지 확인하기때문에
   // 들어오는 요청이 필요하다 -> 쿠키에서 데이터 유효성 검사, 추출한 다음
   // 의미가 있는 경우 세션 개체를 제공한다!
-  const session = await getSession({req: req})
+
+  // test
+  console.log('☘️',req.body) // { oldPassword: '1111111', newPassword: '2222222' }
+
+  const {session} = await getServerSession(req, res, authOptions)
+
+  // const session = await getSession({req: req})
+  console.log('🫧세션??', session)
+
   if (!session) {
-    res.status(401).json({message: '인증된 사용자가 아닙니다.'})
-    return
+    console.log('🎽세션없음.....')
+    res.status(401).json({message: '세션이 없다!! 인증된 사용자가 아닙니다.'})
+    return;
   }
   // 들어온 요청에서 데이터 추출
   // email을 입력하지 않아도 토큰에 이메일 주소를 부호화했기 때문에 알 수 있다
@@ -50,10 +61,12 @@ export default async function handler(req, res) {
   const usersCollection = client.db().collection('users')
   const user = await usersCollection.findOne({email: userEmail})
 
+
   if (!user) {
     // 세션으로부터 사용자 이메일 주소를 못가져오는 경우
     // 연결을 해제하고 에러 반환하기
-    res.status(404).json({message: 'User not found!'})
+    console.log('🌧️유저없음️', user)
+    res.status(404).json({message: 'User not found!, 사용자를 못가져오는중!'})
     client.close()
     return;
   }
@@ -64,7 +77,7 @@ export default async function handler(req, res) {
   // 인증된 사용자이긴하지만, 비번 변경 권한이 없음
   // 422 - 입력값이 틀렸음 을 사용해도 됨
   if (!passwordsAreEqual) {
-    res.status(403).json({message: 'Invalid password'})
+    res.status(403).json({message: 'Invalid password, 비번이 틀렸습니다!'})
     client.close()
     return;
   }

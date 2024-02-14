@@ -6,13 +6,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 // NextAuth을 호출 -> 새로운 handler 함수 생성
 // 로그인 로직 구현
-export default NextAuth({
+export const authOptions = {
   // 인증된 사용자에 대한 세션을 관리하는 방법을 구성할 수 있는 객체
   session: {
-    jwt: true, //jwt를 사용
+    // jwt: true, //jwt를 사용
     // 아래것으로 바뀌었다함
-    // strategy: "jwt",
+    strategy: "jwt",
   },
+  secret: process.env.NEXTAUTH_SECRET,
   // 크레덴결셜 기반의 인증
   providers: [
     CredentialsProvider({
@@ -51,4 +52,6 @@ export default NextAuth({
       }
     })
   ]
-})
+}
+
+export default NextAuth(authOptions)

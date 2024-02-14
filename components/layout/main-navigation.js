@@ -5,7 +5,7 @@ import {signOut, useSession} from "next-auth/react";
 function MainNavigation() {
   // session의 활성 상태를 나타내는 세션 객체, 로그인된 상태인지 아닌지 확인하는 요소
   const {data: session, loading} = useSession()
-  console.log(session, loading)
+  console.log('🥶nav-bar에서 세션 정보: ',session)
 
   function logoutHandler() {
     // useSession을 사용하기 때문에 session에 변화가 있을 때마다
