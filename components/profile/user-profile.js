@@ -35,10 +35,23 @@ function UserProfile() {
   // 페이지를 랜더링할때부터 인증 되어야 랜더링을 허용한다
   // 3. pages/profile.js에 getServerSideProps을 활용해 구현
 
+
+  // HTTP 요청을 보내는 곳!
+  async function changePasswordHandler(passwordData) {
+    const response = await fetch('/api/user/change-password', {
+      method: 'PATCH',
+      body: JSON.stringify(passwordData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const data = await response.json()
+    console.log('🌸',data)
+  }
   return (
     <section className={classes.profile}>
       <h1>Your User Profile</h1>
-      <ProfileForm />
+      <ProfileForm onChangePassword={changePasswordHandler}/>
     </section>
   );
 }
